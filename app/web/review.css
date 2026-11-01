@@ -1,0 +1,93 @@
+/* Review candidate only. Colors and controls inherit the existing common tokens. */
+.review-candidate{
+  --space-1:4px;--space-2:8px;--space-3:12px;--space-4:16px;--space-6:24px;--space-8:32px;
+  --review-nav:208px;--review-chat:304px;--review-measure:780px;--review-radius:8px;
+}
+.review-candidate .topbar{gap:var(--space-4)}
+.review-candidate .topbar nav{min-width:0;overflow-x:auto;flex-shrink:1}
+.review-candidate .topbar nav button{white-space:nowrap;font-size:13px;padding-inline:var(--space-3)}
+.review-candidate .topbar #importOpen{font-size:13px;line-height:inherit;display:block}
+.review-candidate .topbar .connection{white-space:nowrap}
+.review-candidate .sidebar{display:none}
+.review-candidate .review-layout{display:grid;grid-template-columns:var(--review-nav) minmax(0,1fr) var(--review-chat);min-height:0;overflow:hidden}
+.review-candidate #reviewOutline{background:var(--wash);border-right:1px solid var(--line);padding:var(--space-6) var(--space-3);overflow-y:auto;min-height:0;overscroll-behavior:contain}
+.review-candidate .outline-label{margin:0 var(--space-2) var(--space-2);font-size:12px;color:var(--muted);font-weight:650}
+.review-candidate .outline-label span{font-weight:400;display:block;margin-top:var(--space-1)}
+.review-candidate .review-courses{margin-bottom:var(--space-6)}
+.review-candidate #reviewOutline .course-button{width:100%;max-width:none;white-space:normal;overflow-wrap:anywhere;padding:var(--space-2) var(--space-3);font-size:14px}
+.review-candidate .review-week{margin-bottom:var(--space-4)}
+.review-candidate .review-week>button:first-child{width:100%;font-size:12px;font-weight:650;text-align:left;line-height:1.6;white-space:normal}
+.review-candidate #reviewOutline .outline-button{display:block;padding:var(--space-2) var(--space-3);font-size:12px;line-height:1.65;overflow-wrap:anywhere;white-space:normal;max-width:none}
+.review-candidate #reviewInputs{width:100%;margin-top:var(--space-4);font-size:12px}
+.review-candidate .review-candidate-note{font-size:11px;line-height:1.7;color:var(--muted);margin:var(--space-4) var(--space-2)}
+.review-candidate .reading{padding:0;overflow:auto;overscroll-behavior:contain;scroll-behavior:auto;scrollbar-gutter:stable}
+.review-candidate .reading-inner{max-width:var(--review-measure);padding:var(--space-8) clamp(24px,3vw,48px) 80px;line-height:1.85;overflow-wrap:anywhere}
+.review-candidate .reading-inner h1{font-size:26px;line-height:1.45;letter-spacing:-.6px;max-width:none;margin:var(--space-2) 0 var(--space-3)}
+.review-candidate .review-source-head{margin-bottom:var(--space-8);padding-bottom:var(--space-6);border-bottom:1px solid var(--line)}
+.review-candidate .eyebrow{font-size:12px;color:var(--green);margin:0;font-weight:600}
+.review-candidate .review-source-head>a{font-size:12px}
+.review-candidate .reading a{color:var(--green);text-underline-offset:3px}
+.review-candidate .reading .lesson{margin:0 0 var(--space-8);padding-bottom:var(--space-6);scroll-margin-top:var(--space-6)}
+.review-candidate .reading .lesson h2{font-size:21px;line-height:1.55;letter-spacing:-.3px;margin:0 0 var(--space-4)}
+.review-candidate .reading .lesson h3{font-size:16px;line-height:1.6;margin:var(--space-6) 0 var(--space-3)}
+.review-candidate .reading .lesson p,.review-candidate .reading li{font-size:15px;line-height:1.95;margin:var(--space-3) 0;max-width:none}
+.review-candidate .reading .lesson .goal{font-size:13px;color:var(--muted)}
+.review-candidate .reading ul,.review-candidate .reading ol{padding-left:var(--space-6)}
+.review-candidate .reading code{font-family:ui-monospace,Consolas,monospace;font-size:.9em;background:var(--wash);border-radius:3px;padding:1px 3px;overflow-wrap:anywhere;white-space:normal}
+.review-candidate .source-reference small{font-size:11px;color:var(--muted);overflow-wrap:anywhere}
+.review-candidate .source-code-wrap{margin:var(--space-6) 0;background:var(--wash);border:1px solid var(--line);border-radius:var(--review-radius);padding:var(--space-4);max-width:100%;overflow:auto}
+.review-candidate .source-format{font-size:10px;color:var(--muted)}
+.review-candidate .reading pre{margin:var(--space-2) 0;line-height:1.8;max-width:100%;overflow:auto;white-space:pre;tab-size:2}
+.review-candidate .reading pre code{white-space:pre;overflow-wrap:normal;background:none;padding:0;font-size:13px}
+.review-candidate .source-table{overflow:auto;max-width:100%;margin:var(--space-6) 0;border:1px solid var(--line);border-radius:var(--review-radius)}
+.review-candidate .source-table table{border-collapse:collapse;min-width:100%;font-size:13px;line-height:1.8}
+.review-candidate .source-table th,.review-candidate .source-table td{padding:var(--space-3);border-bottom:1px solid var(--line);text-align:left;min-width:100px;vertical-align:top}
+.review-candidate .source-table th{background:var(--wash);font-weight:650}
+.review-candidate .source-table tr:last-child td{border-bottom:0}
+.review-candidate .source-metadata{font-size:12px;color:var(--muted);margin-bottom:var(--space-8)}
+.review-candidate .review-card-section>h2{font-size:21px;margin-top:var(--space-8)}
+.review-candidate .figure{padding:var(--space-4);background:var(--wash);border:1px solid var(--line);border-radius:var(--review-radius)}
+.review-candidate .figure svg,.review-candidate .figure img{display:block;width:100%;max-width:100%;height:auto;margin:auto}
+.review-candidate .lesson-actions{gap:var(--space-1);flex-wrap:wrap}
+.review-candidate .lesson-actions button{padding:var(--space-1) var(--space-2);font-size:12px;color:var(--muted)}
+.review-candidate #readingRail{display:none}
+.review-candidate .chat{width:auto;min-width:0;min-height:0;position:static;box-shadow:none;grid-column:3;overflow:hidden}
+.review-candidate .chat.closed{display:none}
+.review-candidate .review-layout:has(.chat.closed){grid-template-columns:var(--review-nav) minmax(0,1fr)}
+.review-candidate .chat-head{padding:var(--space-3) var(--space-4);font-size:14px;min-height:55px}
+.review-candidate .chat-log{padding:var(--space-4);overscroll-behavior:contain}
+.review-candidate .chat-compose{padding:var(--space-3)}
+.review-candidate .chat-compose textarea{resize:vertical;max-height:35vh;min-height:96px}
+.review-candidate .context{white-space:normal;overflow-wrap:anywhere}
+.review-candidate .message{overflow-wrap:anywhere;font-size:13px;line-height:1.85}
+.review-candidate .mobile-chat{display:inline-block}
+.review-candidate #reviewOutlineToggle{display:none}
+.review-candidate .toolbar{min-height:52px;height:52px;flex-basis:52px;gap:var(--space-2);padding-inline:var(--space-6)}
+.review-candidate .toolbar #reviewScope{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;font-size:12px;line-height:1.5}
+.review-candidate .review-input-list{padding-left:var(--space-6)}
+.review-candidate .review-input-list small{display:block;color:var(--muted);overflow-wrap:anywhere;font-size:12px;margin-top:var(--space-2)}
+@media(max-width:1100px){
+  .review-candidate{--review-nav:180px;--review-chat:280px}
+  .review-candidate .reading-inner{padding-inline:var(--space-6)}
+  .review-candidate .reading .lesson h2{font-size:19px}
+}
+@media(max-width:900px){
+  .review-candidate .review-layout,.review-candidate .review-layout:has(.chat.closed){grid-template-columns:var(--review-nav) minmax(0,1fr)}
+  .review-candidate .chat{position:absolute;grid-area:auto;z-index:8;right:0;top:0;bottom:0;width:min(360px,90%);box-shadow:-8px 0 28px #0001}
+  .review-candidate .topbar .connection,.review-candidate .topbar .demo-banner{display:none}
+}
+@media(max-width:600px){
+  .review-candidate #reviewOutlineToggle{display:inline-block}
+  .review-candidate .topbar{gap:var(--space-2);padding-inline:var(--space-3)}
+  .review-candidate .topbar .brand{font-size:14px}.review-candidate .space-menu{display:none}
+  .review-candidate .topbar nav button{font-size:12px;padding-inline:var(--space-2)}
+  .review-candidate .topbar .admin-link{margin-left:auto}
+  .review-candidate .review-layout,.review-candidate .review-layout:has(.chat.closed){grid-template-columns:minmax(0,1fr)}
+  .review-candidate #reviewOutline{display:none;position:absolute;top:0;bottom:0;left:0;width:min(280px,85%);z-index:9;background:var(--paper);box-shadow:8px 0 24px #0001}
+  .review-candidate #reviewOutline.open{display:block}
+  .review-candidate .toolbar{padding-inline:var(--space-3)}
+  .review-candidate .toolbar button{font-size:12px;padding:6px 8px}
+  .review-candidate .reading-inner{padding:var(--space-6) var(--space-4) 64px}
+  .review-candidate .reading-inner h1{font-size:23px}
+  .review-candidate .reading .lesson p,.review-candidate .reading li{font-size:15px;line-height:1.9}
+}

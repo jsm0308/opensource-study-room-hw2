@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>오픈소스SW 학습실</title>
+  <link rel="icon" href="data:,">
+  <link rel="stylesheet" href="/web/vendor/katex/katex.min.css">
+  <script src="/web/vendor/katex/katex.min.js"></script>
+  <link rel="stylesheet" href="/web/styles.css">
+  <link rel="stylesheet" href="/web/mobile.css">
+  <link rel="stylesheet" href="/web/fixes.css">
+  <link rel="stylesheet" href="/web/layout.css">
+  <link rel="stylesheet" href="/web/review.css">
+  <link rel="stylesheet" href="/web/workspace.css">
+  <link rel="stylesheet" href="/web/learning-records.css">
+  <link rel="stylesheet" href="/web/management.css">
+  <link rel="stylesheet" href="/web/learning-graph.css">
+</head>
+<body>
+  <header class="topbar"></header>
+  <div class="app-shell">
+    <aside class="sidebar" id="sidebar" aria-label="과목 이동"></aside>
+    <main class="main">
+      <section class="view" id="materialsView" aria-label="자료실"><span id="materialsScope" hidden></span><div class="materials-page" id="materialsPage"></div></section>
+      <section class="view" id="boardView" aria-label="학습 보드">
+        <div class="toolbar"><span id="boardScope"></span><span class="spacer"></span><button id="boardReview">읽기</button><button class="primary" id="boardQuiz">오늘 공부 퀴즈</button></div>
+        <div class="board-wrap" id="boardWrap"><div class="board-world" id="boardWorld"></div><p class="board-help">빈 곳을 끌어 이동 · Ctrl + 휠로 확대</p><div class="zoom-controls"><button id="zoomOut" aria-label="축소">−</button><output id="zoomLabel"></output><button id="zoomIn" aria-label="확대">＋</button><button id="zoomFit">맞춤</button></div></div>
+      </section>
+      <section class="view" id="reviewView" aria-label="복습">
+        <div class="toolbar"><span id="reviewScope"></span><span class="spacer"></span><button class="quiet mobile-chat" id="chatToggle">질문</button><button class="primary" id="reviewQuiz">오늘 공부 퀴즈</button></div>
+        <div class="review-layout"><article class="reading" id="reading" tabindex="-1"></article><aside class="reading-rail" id="readingRail" aria-label="읽기 위치"></aside><aside class="chat" id="chat" aria-label="이 범위에 질문"><div class="chat-head"><strong>질문</strong><button class="quiet mobile-chat" id="chatClose" aria-label="질문 닫기">×</button></div><div class="chat-log" id="chatLog"></div><form class="chat-compose" id="chatForm"><p class="context" id="chatContext"></p><textarea id="chatInput" aria-label="질문" placeholder="읽다가 막힌 부분을 물어보세요." rows="3"></textarea><div><span class="draft-state" id="draftState"></span><button class="primary" id="chatSend">보내기</button></div></form></aside></div>
+      </section>
+      <section class="view" id="quizView" aria-label="퀴즈"><div class="toolbar"><span id="quizScope"></span><span class="spacer"></span><button id="quizBack">읽기로</button></div><div class="quiz-page" id="quizPage"></div></section>
+      <section class="view" id="historyView" aria-label="기록 및 관리"><div id="managementTabs" class="management-tabs" role="tablist" aria-label="기록 및 관리"></div><div class="history-page" id="historyPage"></div></section>
+    </main>
+  </div>
+  <dialog id="dialog"></dialog>
+  <div class="toast" id="toast" role="status"></div>
+  <script type="module" src="/web/app.js"></script>
+</body>
+</html>
