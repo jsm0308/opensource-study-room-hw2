@@ -1,0 +1,131 @@
+name: Docker image
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: docker-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - name: Install dependencies and run tests
+        run: |
+          python -m pip install -r requirements.txt
+          python -m unittest discover -s tests -p "test_*.py" -v
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v4
+
+      - name: Build Docker image
+        uses: docker/build-push-action@v7
+        with:
+          context: .
+          load: true
+          push: false
+          tags: study-room:ci
+
+      - name: Start container and check the app
+        shell: bash
+        run: |
+          set -euo pipefail
+          docker run -d --name study-room-ci \
+            -p 127.0.0.1:10000:10000 \
+            study-room:ci
+          python - <<'PY'
+          import json
+          import time
+          import urllib.request
+
+          for attempt in range(30):
+              try:
+                  with urllib.request.urlopen("http://127.0.0.1:10000/api/bootstrap", timeout=3) as response:
+                      data = json.load(response)
+                  assert [course["id"] for course in data["courses"]] == ["opensource-sw-2026-2"]
+                  assert len(data["cards"]) == 8
+                  assert data["status"]["transport"] == "offline"
+                  print("Container check passed: course, 8 cards, offline demo.")
+                  break
+              except Exception:
+                  if attempt == 29:
+                      raise
+                  time.sleep(2)
+          PY
+
+      - name: Check Docker Hub configuration
+        id: hub
+        shell: bash
+        env:
+          DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME || secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        run: |
+          if [[ -n "$DOCKERHUB_USERNAME" && -n "$DOCKERHUB_TOKEN" ]]; then
+            echo "configured=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            echo "::notice::Image built and tested. Set DOCKERHUB_USERNAME and DOCKERHUB_TOKEN to enable publishing."
+          fi
+
+      - name: Sign in to Docker Hub
+        if: steps.hub.outputs.configured == 'true'
+        uses: docker/login-action@v4
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME || secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Push tested image to Docker Hub
+        if: steps.hub.outputs.configured == 'true'
+        shell: bash
+        env:
+          DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME || secrets.DOCKERHUB_USERNAME }}
+        run: |
+          set -euo pipefail
+          image="${DOCKERHUB_USERNAME}/opensource-study-room-hw3"
+          docker tag study-room:ci "${image}:latest"
+          docker tag study-room:ci "${image}:${GITHUB_SHA}"
+          docker push "${image}:${GITHUB_SHA}"
+          docker push "${image}:latest"
+
+      - name: Write run summary
+        env:
+          PUBLISHED: ${{ steps.hub.outputs.configured }}
+          DOCKERHUB_USERNAME: ${{ vars.DOCKERHUB_USERNAME || secrets.DOCKERHUB_USERNAME }}
+        shell: bash
+        run: |
+          {
+            echo '## Study room Docker image'
+            echo '- Unit tests: passed (4 tests).'
+            echo '- Docker build: passed.'
+            echo '- Container HTTP check: passed (course, 8 cards, offline demo).'
+            if [[ "$PUBLISHED" == 'true' ]]; then
+              echo "- Docker Hub: published to ${DOCKERHUB_USERNAME}/opensource-study-room-hw3."
+              echo "- Tags: latest and ${GITHUB_SHA}."
+            else
+              echo '- Docker Hub: NOT published; account settings are missing.'
+              echo '- Add DOCKERHUB_USERNAME (variable or secret) and DOCKERHUB_TOKEN (secret), then run this workflow again.'
+            fi
+            echo '- Service deployment: not configured in this workflow.'
+          } >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Clean up test container
+        if: always()
+        run: |
+          docker logs study-room-ci || true
+          docker rm -f study-room-ci || true
