@@ -16,6 +16,8 @@ jobs:
   build-and-publish:
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    outputs:
+      published: ${{ steps.hub.outputs.configured }}
     steps:
       - name: Check out code
         uses: actions/checkout@v4
@@ -121,7 +123,7 @@ jobs:
               echo '- Docker Hub: NOT published; account settings are missing.'
               echo '- Add DOCKERHUB_USERNAME (variable or secret) and DOCKERHUB_TOKEN (secret), then run this workflow again.'
             fi
-            echo '- Service deployment: not configured in this workflow.'
+            echo '- Service deployment: see the Deploy to Windows PC job.'
           } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Clean up test container
@@ -129,3 +131,87 @@ jobs:
         run: |
           docker logs study-room-ci || true
           docker rm -f study-room-ci || true
+
+  deploy:
+    name: Deploy to Windows PC
+    needs: build-and-publish
+    if: github.ref == 'refs/heads/main' && needs.build-and-publish.outputs.published == 'true'
+    runs-on: [self-hosted, Windows, X64]
+    timeout-minutes: 10
+    steps:
+      - name: Deploy exact image and verify the service
+        shell: powershell
+        env:
+          IMAGE: jsm0308/opensource-study-room-hw3:${{ github.sha }}
+          REVISION: ${{ github.sha }}
+        run: |
+          $ErrorActionPreference = 'Stop'
+          $containerName = 'study-room-hw3'
+          $volumeName = 'study-room-hw3-data'
+          $backupName = 'study-room-hw3-previous-' + $env:GITHUB_RUN_ID + '-' + $env:GITHUB_RUN_ATTEMPT
+
+          function Invoke-Docker {
+            & docker @args
+            if ($LASTEXITCODE -ne 0) { throw "Docker command failed: $($args[0])" }
+          }
+
+          Invoke-Docker info --format '{{.OSType}}'
+          # Finish the download before interrupting the existing service.
+          Invoke-Docker pull $env:IMAGE
+          $expectedImage = Invoke-Docker image inspect $env:IMAGE --format '{{.Id}}'
+          $names = @(Invoke-Docker ps -a --format '{{.Names}}')
+          $hadPrevious = $names -contains $containerName
+          $previousRunning = $false
+          if ($hadPrevious) {
+            $previous = (Invoke-Docker inspect $containerName | ConvertFrom-Json)[0]
+            $dataMount = @($previous.Mounts | Where-Object { $_.Destination -eq '/app/data' })
+            if ($dataMount.Count -ne 1 -or $dataMount[0].Type -ne 'volume' -or $dataMount[0].Name -ne $volumeName) {
+              throw 'Existing data mount differs from the expected named volume. Stopping to preserve data.'
+            }
+            $previousRunning = $previous.State.Running
+            Invoke-Docker stop $containerName
+            Invoke-Docker rename $containerName $backupName
+          }
+
+          try {
+            Invoke-Docker run -d --name $containerName `
+              --label "org.opencontainers.image.revision=$env:REVISION" `
+              -p 127.0.0.1:10000:10000 `
+              --mount "source=$volumeName,target=/app/data" `
+              $env:IMAGE
+
+            $ready = $false
+            for ($attempt = 0; $attempt -lt 30; $attempt++) {
+              try {
+                $data = Invoke-RestMethod -Uri 'http://127.0.0.1:10000/api/bootstrap' -TimeoutSec 3
+                if ($data.courses.id -notcontains 'opensource-sw-2026-2') { throw 'Course missing.' }
+                if ($data.status.transport -ne 'offline') { throw 'Demo mode missing.' }
+                $ready = $true
+                break
+              } catch {
+                Start-Sleep -Seconds 2
+              }
+            }
+            if (-not $ready) { throw 'The new service did not become ready.' }
+            $runningImage = Invoke-Docker inspect $containerName --format '{{.Image}}'
+            if ($runningImage -ne $expectedImage) { throw 'Running image differs from the published revision.' }
+          } catch {
+            $failure = $_
+            docker logs $containerName
+            docker rm -f $containerName
+            if ($hadPrevious) {
+              Invoke-Docker rename $backupName $containerName
+              if ($previousRunning) { Invoke-Docker start $containerName }
+            }
+            throw $failure
+          }
+
+          if ($hadPrevious) { Invoke-Docker rm $backupName }
+          @(
+            '## Local deployment verified',
+            "- Image: $env:IMAGE",
+            "- Image ID: $runningImage",
+            '- URL: http://127.0.0.1:10000/',
+            '- HTTP check: passed; expected course and offline demo confirmed.',
+            "- Data volume: $volumeName (preserved)."
+          ) | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Encoding utf8 -Append
